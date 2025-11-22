@@ -423,7 +423,11 @@ export default function App() {
               {pantry.map((item, idx) => (
                 <span key={idx} className="bg-white border border-gray-200 text-black px-4 py-2 rounded-full flex items-center gap-2 shadow-sm animate-in zoom-in duration-200 text-sm font-medium">
                   <span className="capitalize">{item}</span>
-                  <button onClick={() => removePantryItem(item)} className="transition-colors text-gray-400 hover:text-purple-600" >
+                  {/* FIX: Se eliminaron los manejadores de mouse directos que causaban error de sintaxis */}
+                  <button 
+                    onClick={() => removePantryItem(item)} 
+                    className="transition-colors text-gray-400 hover:text-purple-600" 
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 </span>
@@ -448,8 +452,8 @@ export default function App() {
                   <img src={newRecipe.image} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <>
-                    <Camera className="w-8 h-8 mb-2 transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT} />
-                    <span className="text-xs font-medium transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT}>Toca para añadir foto</span>
+                    <Camera className="w-8 h-8 mb-2 transition-colors" style={{color: COLOR_ACCENT}} />
+                    <span className="text-xs font-medium transition-colors" style={{color: COLOR_ACCENT}}>Toca para añadir foto</span>
                   </>
                 )}
                 <input 
@@ -467,7 +471,7 @@ export default function App() {
                 <input 
                   type="text" 
                   className="w-full mt-1 bg-white border-b-2 border-gray-100 p-2 outline-none transition-all font-medium text-lg placeholder-gray-300 focus:border-opacity-100"
-                  style={{focusBorderColor: COLOR_PRIMARY}}
+                  // style={{focusBorderColor: COLOR_PRIMARY}} // Propiedad inválida, Tailwind lo maneja
                   placeholder="Ej: Pasta Alfredo"
                   value={newRecipe.name}
                   onChange={e => setNewRecipe({...newRecipe, name: e.target.value})}
@@ -481,7 +485,7 @@ export default function App() {
                   <input 
                     type="text" 
                     className="flex-[2] bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-opacity-100"
-                    style={{focusBorderColor: COLOR_PRIMARY}}
+                    // style={{focusBorderColor: COLOR_PRIMARY}} // Propiedad inválida, Tailwind lo maneja
                     placeholder="Ingrediente (ej: Huevo)"
                     value={newRecipe.currentIngName}
                     onChange={e => setNewRecipe({...newRecipe, currentIngName: e.target.value})}
@@ -489,7 +493,7 @@ export default function App() {
                   <input 
                     type="text" 
                     className="flex-1 bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-opacity-100"
-                    style={{focusBorderColor: COLOR_PRIMARY}}
+                    // style={{focusBorderColor: COLOR_PRIMARY}} // Propiedad inválida, Tailwind lo maneja
                     placeholder="Cant. (ej: 2)"
                     value={newRecipe.currentIngQty}
                     onChange={e => setNewRecipe({...newRecipe, currentIngQty: e.target.value})}
@@ -525,7 +529,7 @@ export default function App() {
                 <textarea 
                   id="instructions-area"
                   className="w-full bg-gray-50 rounded-xl p-3 outline-none border-2 border-transparent h-32 text-sm resize-none leading-relaxed focus:border-opacity-100"
-                  style={{focusBorderColor: COLOR_PRIMARY}}
+                  // style={{focusBorderColor: COLOR_PRIMARY}} // Propiedad inválida, Tailwind lo maneja
                   placeholder="Escribe aquí... Usa los botones para formato."
                   value={newRecipe.instructions}
                   onChange={e => setNewRecipe({...newRecipe, instructions: e.target.value})}
