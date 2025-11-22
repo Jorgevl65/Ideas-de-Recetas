@@ -80,22 +80,38 @@ const RichTextRenderer = ({ text }) => {
   );
 };
 
+// --- Función para parsear localStorage de forma segura ---
+const safeParseLocalStorage = (key, defaultValue) => {
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      // Intentar parsear los datos guardados
+      return JSON.parse(saved);
+    }
+  } catch (error) {
+    // Si hay un error de parsing (datos corruptos), registrarlo y usar el valor por defecto
+    console.error(`ERROR CRÍTICO: No se pudo parsear localStorage key "${key}". Usando valores por defecto. Causa:`, error);
+  }
+  return defaultValue;
+};
+
+
 export default function App() {
+  console.log("App component is mounting/rendering...");
+  
   // --- Estados de Navegación y Búsqueda ---
   const [activeTab, setActiveTab] = useState('recipes'); // pantry, recipes, add
   const [selectedRecipe, setSelectedRecipe] = useState(null); // Para ver detalle
   const [searchQuery, setSearchQuery] = useState(''); // Texto del buscador
   const [searchType, setSearchType] = useState('name'); // 'name' o 'ingredients'
 
-  // --- Datos Persistentes ---
+  // --- Datos Persistentes (USANDO safeParseLocalStorage) ---
   const [pantry, setPantry] = useState(() => {
-    const saved = localStorage.getItem('chefPantryV3'); 
-    return saved ? JSON.parse(saved) : ['huevo', 'aceite', 'sal'];
+    return safeParseLocalStorage('chefPantryV3', ['huevo', 'aceite', 'sal']);
   });
   
   const [recipes, setRecipes] = useState(() => {
-    const saved = localStorage.getItem('chefRecipesV3');
-    return saved ? JSON.parse(saved) : INITIAL_RECIPES;
+    return safeParseLocalStorage('chefRecipesV3', INITIAL_RECIPES);
   });
 
   // --- Inputs Temporales de Formulario ---
