@@ -1,0 +1,15 @@
+{
+  "name": "App Recetas",
+  "short_name": "Recetas",
+  "description": "Mi aplicación de recetas personalizada.",
+  "icons": [
+    {
+      "src": "/icono_app.png",
+      "sizes": "968x968",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#5F249F",
+  "background_color": "#5F249F",
+  "display": "standalone"
+}
