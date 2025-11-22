@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ReactDOM from 'react-dom/client'; // Necesario para mostrar la app
 import { ChefHat, Plus, X, Search, BookOpen, ShoppingBag, CheckCircle, AlertCircle, ArrowLeft, Camera, Image as ImageIcon, Bold, List } from 'lucide-react';
+
+// --- Constantes de Diseño ---
+const COLOR_PRIMARY = '#5F249F'; // Púrpura principal
+const COLOR_ACCENT = '#A9A9A9'; // Gris para detalles
 
 // --- Datos Iniciales Mejorados ---
 const INITIAL_RECIPES = [
@@ -48,7 +51,8 @@ const INITIAL_RECIPES = [
 // --- Componente para renderizar texto con formato básico ---
 const RichTextRenderer = ({ text }) => {
   return (
-    <div className="space-y-2 text-[#A9A9A9] text-sm leading-relaxed font-medium">
+    // Aplicamos estilos en línea para el color del texto base
+    <div className="space-y-2 text-sm leading-relaxed font-medium">
       {text.split('\n').map((line, i) => {
         if (!line.trim()) return <br key={i} />;
         
@@ -56,8 +60,9 @@ const RichTextRenderer = ({ text }) => {
         if (line.trim().startsWith('-')) {
           return (
             <div key={i} className="flex gap-2 ml-2">
-              <span className="text-[#5F249F] font-bold">•</span>
+              <span className={`font-bold`} style={{color: COLOR_PRIMARY}}>•</span>
               <span className="text-gray-600" dangerouslySetInnerHTML={{ 
+                // Aseguramos que la negrita sea negra para contraste
                 __html: line.substring(1).replace(/\*\*(.*?)\*\*/g, '<strong style="color: black;">$1</strong>') 
               }} />
             </div>
@@ -67,6 +72,7 @@ const RichTextRenderer = ({ text }) => {
         // Renderizar texto normal con negritas
         return (
           <p key={i} className="text-gray-600" dangerouslySetInnerHTML={{ 
+            // Aseguramos que la negrita sea negra para contraste
             __html: line.replace(/\*\*(.*?)\*\*/g, '<strong style="color: black;">$1</strong>') 
           }} />
         );
@@ -75,16 +81,16 @@ const RichTextRenderer = ({ text }) => {
   );
 };
 
-// Quitamos el 'default' para usarlo internamente abajo
-function App() {
-  // --- Estados ---
+export default function App() {
+  // --- Estados de Navegación y Búsqueda ---
   const [activeTab, setActiveTab] = useState('recipes'); // pantry, recipes, add
   const [selectedRecipe, setSelectedRecipe] = useState(null); // Para ver detalle
-  const [searchQuery, setSearchQuery] = useState(''); // Buscador
+  const [searchQuery, setSearchQuery] = useState(''); // Texto del buscador
+  const [searchType, setSearchType] = useState('name'); // 'name' o 'ingredients'
 
-  // Datos Persistentes
+  // --- Datos Persistentes ---
   const [pantry, setPantry] = useState(() => {
-    const saved = localStorage.getItem('chefPantryV3'); // V3 para nueva versión
+    const saved = localStorage.getItem('chefPantryV3'); 
     return saved ? JSON.parse(saved) : ['huevo', 'aceite', 'sal'];
   });
   
@@ -93,7 +99,7 @@ function App() {
     return saved ? JSON.parse(saved) : INITIAL_RECIPES;
   });
 
-  // Inputs Temporales
+  // --- Inputs Temporales de Formulario ---
   const [ingredientInput, setIngredientInput] = useState('');
   const [newRecipe, setNewRecipe] = useState({ 
     name: '', 
@@ -107,7 +113,7 @@ function App() {
   // Referencia para input de archivo
   const fileInputRef = useRef(null);
 
-  // --- Efectos ---
+  // --- Efectos para Persistencia (localStorage) ---
   useEffect(() => { localStorage.setItem('chefPantryV3', JSON.stringify(pantry)); }, [pantry]);
   useEffect(() => { localStorage.setItem('chefRecipesV3', JSON.stringify(recipes)); }, [recipes]);
 
@@ -127,6 +133,7 @@ function App() {
 
   // --- Lógica Recetas ---
   const getRecipeStatus = (recipe) => {
+    // Comparamos los nombres de ingredientes normalizados
     const missing = recipe.ingredients.filter(reqIng => 
       !pantry.some(userIng => normalize(userIng) === normalize(reqIng.name))
     );
@@ -137,13 +144,25 @@ function App() {
     };
   };
 
-  // Filtrar y Ordenar
+  // Filtrado y Ordenamiento Mejorado
   const filteredRecipes = recipes
-    .filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter(r => {
+      if (!searchQuery) return true;
+      const query = normalize(searchQuery);
+
+      if (searchType === 'name') {
+        return normalize(r.name).includes(query);
+      } else if (searchType === 'ingredients') {
+        return r.ingredients.some(ing => normalize(ing.name).includes(query));
+      }
+      return true; // Si no hay tipo, no filtra
+    })
     .map(r => ({...r, status: getRecipeStatus(r)}))
     .sort((a, b) => {
+      // Prioriza recetas que se pueden cocinar
       if (a.status.canCook && !b.status.canCook) return -1;
       if (!a.status.canCook && b.status.canCook) return 1;
+      // Luego ordena por porcentaje de ingredientes disponibles
       return b.status.matchPercentage - a.status.matchPercentage;
     });
 
@@ -164,6 +183,7 @@ function App() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Usamos URL.createObjectURL para simular la subida de foto
       const url = URL.createObjectURL(file);
       setNewRecipe({ ...newRecipe, image: url });
     }
@@ -206,7 +226,7 @@ function App() {
             alt={selectedRecipe.name} 
             className="w-full h-full object-cover"
           />
-          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#5F249F]/60 to-transparent"></div>
+          <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[${COLOR_PRIMARY}]/60 to-transparent`}></div>
           <button 
             onClick={() => setSelectedRecipe(null)}
             className="absolute top-4 left-4 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all shadow-lg"
@@ -220,11 +240,11 @@ function App() {
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-3xl font-bold text-black leading-tight">{selectedRecipe.name}</h2>
             {status.canCook ? (
-              <span className="bg-[#5F249F] text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-md">
+              <span className={`bg-[${COLOR_PRIMARY}] text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-md`}>
                 <CheckCircle className="w-3 h-3" /> LISTO
               </span>
             ) : (
-              <span className="bg-[#A9A9A9]/20 text-[#A9A9A9] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              <span className={`bg-[${COLOR_ACCENT}]/20 text-[${COLOR_ACCENT}] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1`}>
                 Faltan {status.missing.length}
               </span>
             )}
@@ -232,17 +252,17 @@ function App() {
 
           {/* Sección Ingredientes */}
           <div className="mb-8">
-            <h3 className="font-bold text-lg mb-3 border-b border-gray-100 pb-2 text-[#5F249F]">Ingredientes</h3>
+            <h3 className="font-bold text-lg mb-3 border-b border-gray-100 pb-2" style={{color: COLOR_PRIMARY}}>Ingredientes</h3>
             <ul className="space-y-3">
               {selectedRecipe.ingredients.map((ing, i) => {
                 const hasIt = pantry.some(p => normalize(p) === normalize(ing.name));
                 return (
                   <li key={i} className="flex justify-between items-center text-sm">
-                    <span className={`capitalize flex items-center gap-2 ${hasIt ? 'text-black font-medium' : 'text-[#A9A9A9] line-through decoration-red-400'}`}>
-                      {hasIt ? <CheckCircle className="w-4 h-4 text-[#5F249F]" /> : <AlertCircle className="w-4 h-4 text-[#A9A9A9]" />}
+                    <span className={`capitalize flex items-center gap-2 ${hasIt ? 'text-black font-medium' : `text-[${COLOR_ACCENT}] line-through decoration-red-400`}`}>
+                      {hasIt ? <CheckCircle className="w-4 h-4" style={{color: COLOR_PRIMARY}} /> : <AlertCircle className="w-4 h-4" style={{color: COLOR_ACCENT}} />}
                       {ing.name}
                     </span>
-                    <span className="text-[#A9A9A9] font-mono text-xs font-medium">{ing.qty}</span>
+                    <span className={`text-[${COLOR_ACCENT}] font-mono text-xs font-medium`}>{ing.qty}</span>
                   </li>
                 );
               })}
@@ -251,7 +271,7 @@ function App() {
 
           {/* Sección Preparación */}
           <div>
-            <h3 className="font-bold text-lg mb-3 border-b border-gray-100 pb-2 text-[#5F249F]">Preparación</h3>
+            <h3 className="font-bold text-lg mb-3 border-b border-gray-100 pb-2" style={{color: COLOR_PRIMARY}}>Preparación</h3>
             <RichTextRenderer text={selectedRecipe.instructions} />
           </div>
           
@@ -261,12 +281,12 @@ function App() {
     );
   }
 
-  // --- Renderizado Principal ---
+  // --- Renderizado Principal (Layout con Scroll Fijo) ---
   return (
     <div className="min-h-screen bg-white text-black font-sans flex flex-col md:max-w-md md:mx-auto md:shadow-2xl md:min-h-screen overflow-hidden">
       
-      {/* Header Personalizado */}
-      <header className="bg-[#5F249F] text-white pt-8 pb-6 px-6 rounded-b-[2rem] shadow-xl relative z-10 transition-colors duration-300">
+      {/* Header Personalizado (Fijo) */}
+      <header className={`bg-[${COLOR_PRIMARY}] text-white pt-8 pb-6 px-6 rounded-b-[2rem] shadow-xl relative z-10 transition-colors duration-300`}>
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
@@ -276,30 +296,57 @@ function App() {
           </div>
         </div>
         
-        {/* Buscador Integrado */}
+        {/* Buscador Integrado (solo en Recetas) */}
         {activeTab === 'recipes' && (
           <div className="relative mt-2 animate-in fade-in slide-in-from-top-2">
             <Search className="absolute left-3 top-3 w-4 h-4 text-white/70" />
             <input 
               type="text" 
-              placeholder="Buscar receta..." 
+              placeholder={searchType === 'name' ? "Buscar por nombre de receta..." : "Buscar por ingrediente..."} 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/60 text-sm rounded-xl py-2.5 pl-9 pr-4 outline-none focus:bg-white/20 transition-all"
             />
+            {/* Selector de Tipo de Búsqueda */}
+            <div className="flex justify-end mt-2 text-xs font-medium space-x-3">
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="searchType" 
+                  value="name" 
+                  checked={searchType === 'name'} 
+                  onChange={() => setSearchType('name')}
+                  className="form-radio text-white border-white/50 bg-transparent checked:bg-white checked:ring-white focus:ring-white"
+                  style={{color: 'white'}}
+                />
+                <span className="text-white">Por Nombre</span>
+              </label>
+              <label className="flex items-center gap-1 cursor-pointer">
+                <input 
+                  type="radio" 
+                  name="searchType" 
+                  value="ingredients" 
+                  checked={searchType === 'ingredients'} 
+                  onChange={() => setSearchType('ingredients')}
+                  className="form-radio text-white border-white/50 bg-transparent checked:bg-white checked:ring-white focus:ring-white"
+                  style={{color: 'white'}}
+                />
+                <span className="text-white">Por Ingrediente</span>
+              </label>
+            </div>
           </div>
         )}
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-4 pb-24">
+      {/* Contenido Principal con Scroll (Flex-1) */}
+      <div className="flex-1 overflow-y-auto p-4 pb-0">
         
         {/* --- VISTA: RECETAS --- */}
         {activeTab === 'recipes' && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+          <div className="space-y-4 pb-4 animate-in fade-in slide-in-from-right-4 duration-300">
             {filteredRecipes.length === 0 ? (
-              <div className="text-center py-10 text-[#A9A9A9]">
-                <p>No encontramos recetas con ese nombre.</p>
+              <div className={`text-center py-10`} style={{color: COLOR_ACCENT}}>
+                <p>No encontramos recetas.</p>
               </div>
             ) : (
               filteredRecipes.map((recipe) => (
@@ -315,17 +362,17 @@ function App() {
                     {/* Badge de estado */}
                     <div className="absolute top-3 right-3">
                       {recipe.status.canCook ? (
-                        <span className="bg-white/95 backdrop-blur text-[#5F249F] text-[10px] font-extrabold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
+                        <span className={`bg-white/95 backdrop-blur text-[${COLOR_PRIMARY}] text-[10px] font-extrabold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1`}>
                           <CheckCircle className="w-3 h-3" /> LISTO
                         </span>
                       ) : (
-                        <span className="bg-[#5F249F] backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md">
+                        <span className={`bg-[${COLOR_PRIMARY}]/80 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md`}>
                           FALTA {recipe.status.missing.length}
                         </span>
                       )}
                     </div>
                     
-                    <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[#5F249F]/90 to-transparent">
+                    <div className={`absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[${COLOR_PRIMARY}]/90 to-transparent`}>
                        <h4 className="font-bold text-white text-lg tracking-wide">{recipe.name}</h4>
                     </div>
                   </div>
@@ -337,7 +384,7 @@ function App() {
 
         {/* --- VISTA: DESPENSA --- */}
         {activeTab === 'pantry' && (
-          <div className="animate-in fade-in slide-in-from-left-4 duration-300">
+          <div className="animate-in fade-in slide-in-from-left-4 duration-300 pb-4">
             <div className="mb-6 relative">
               <form onSubmit={addPantryItem} className="flex gap-2">
                 <input
@@ -345,9 +392,9 @@ function App() {
                   value={ingredientInput}
                   onChange={(e) => setIngredientInput(e.target.value)}
                   placeholder="Agregar ingrediente..."
-                  className="flex-1 bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[#5F249F] transition-all text-sm font-medium text-black placeholder-[#A9A9A9]"
+                  className={`flex-1 bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[${COLOR_PRIMARY}] transition-all text-sm font-medium text-black placeholder-[${COLOR_ACCENT}]`}
                 />
-                <button type="submit" className="bg-[#5F249F] text-white px-4 rounded-xl hover:bg-[#4a1c7a] active:scale-95 transition-all shadow-md">
+                <button type="submit" className={`bg-[${COLOR_PRIMARY}] text-white px-4 rounded-xl hover:bg-[#4a1c7a] active:scale-95 transition-all shadow-md`}>
                   <Plus className="w-5 h-5" />
                 </button>
               </form>
@@ -355,12 +402,12 @@ function App() {
 
             <div className="flex flex-wrap gap-2">
               {pantry.length === 0 && (
-                <p className="w-full text-center text-[#A9A9A9] py-8 text-sm">Tu nevera está vacía.</p>
+                <p className={`w-full text-center py-8 text-sm`} style={{color: COLOR_ACCENT}}>Tu nevera está vacía.</p>
               )}
               {pantry.map((item, idx) => (
                 <span key={idx} className="bg-white border border-gray-200 text-black px-4 py-2 rounded-full flex items-center gap-2 shadow-sm animate-in zoom-in duration-200 text-sm font-medium">
                   <span className="capitalize">{item}</span>
-                  <button onClick={() => removePantryItem(item)} className="text-[#A9A9A9] hover:text-[#5F249F] transition-colors">
+                  <button onClick={() => removePantryItem(item)} className={`text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}] transition-colors`}>
                     <X className="w-4 h-4" />
                   </button>
                 </span>
@@ -371,21 +418,22 @@ function App() {
 
         {/* --- VISTA: AGREGAR RECETA --- */}
         {activeTab === 'add' && (
-          <div className="animate-in fade-in slide-in-from-right-4 duration-300 pb-10">
-            <h3 className="font-bold text-xl mb-6 text-[#5F249F]">Crear Receta</h3>
+          // El padding final (pb-24) es crucial para que el último input no quede bajo la barra de navegación
+          <div className="animate-in fade-in slide-in-from-right-4 duration-300 pb-24"> 
+            <h3 className="font-bold text-xl mb-6" style={{color: COLOR_PRIMARY}}>Crear Receta</h3>
             
             <div className="space-y-5">
               {/* Cargar Foto */}
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="h-40 w-full bg-gray-50 border-2 border-dashed border-[#A9A9A9]/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors overflow-hidden group"
+                className={`h-40 w-full bg-gray-50 border-2 border-dashed border-[${COLOR_ACCENT}]/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors overflow-hidden group`}
               >
                 {newRecipe.image ? (
                   <img src={newRecipe.image} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <>
-                    <Camera className="w-8 h-8 text-[#A9A9A9] mb-2 group-hover:text-[#5F249F] transition-colors" />
-                    <span className="text-xs text-[#A9A9A9] font-medium group-hover:text-[#5F249F]">Toca para añadir foto</span>
+                    <Camera className={`w-8 h-8 mb-2 group-hover:text-[${COLOR_PRIMARY}] transition-colors`} style={{color: COLOR_ACCENT}} />
+                    <span className={`text-xs font-medium group-hover:text-[${COLOR_PRIMARY}]`} style={{color: COLOR_ACCENT}}>Toca para añadir foto</span>
                   </>
                 )}
                 <input 
@@ -399,10 +447,10 @@ function App() {
 
               {/* Nombre */}
               <div>
-                <label className="text-xs font-bold text-[#A9A9A9] uppercase tracking-wider">Nombre</label>
+                <label className={`text-xs font-bold uppercase tracking-wider`} style={{color: COLOR_ACCENT}}>Nombre</label>
                 <input 
                   type="text" 
-                  className="w-full mt-1 bg-white border-b-2 border-gray-100 p-2 outline-none focus:border-[#5F249F] transition-all font-medium text-lg placeholder-gray-300"
+                  className={`w-full mt-1 bg-white border-b-2 border-gray-100 p-2 outline-none focus:border-[${COLOR_PRIMARY}] transition-all font-medium text-lg placeholder-gray-300`}
                   placeholder="Ej: Pasta Alfredo"
                   value={newRecipe.name}
                   onChange={e => setNewRecipe({...newRecipe, name: e.target.value})}
@@ -411,23 +459,23 @@ function App() {
 
               {/* Ingredientes + Cantidades */}
               <div>
-                <label className="text-xs font-bold text-[#A9A9A9] uppercase tracking-wider mb-2 block">Ingredientes</label>
+                <label className={`text-xs font-bold uppercase tracking-wider mb-2 block`} style={{color: COLOR_ACCENT}}>Ingredientes</label>
                 <div className="flex gap-2 mb-3">
                   <input 
                     type="text" 
-                    className="flex-[2] bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[#5F249F]"
+                    className={`flex-[2] bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[${COLOR_PRIMARY}]`}
                     placeholder="Ingrediente (ej: Huevo)"
                     value={newRecipe.currentIngName}
                     onChange={e => setNewRecipe({...newRecipe, currentIngName: e.target.value})}
                   />
                   <input 
                     type="text" 
-                    className="flex-1 bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[#5F249F]"
+                    className={`flex-1 bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[${COLOR_PRIMARY}]`}
                     placeholder="Cant. (ej: 2)"
                     value={newRecipe.currentIngQty}
                     onChange={e => setNewRecipe({...newRecipe, currentIngQty: e.target.value})}
                   />
-                  <button onClick={handleAddIngredientToRecipe} className="bg-[#5F249F] text-white p-2 rounded-lg shadow-md hover:bg-[#4a1c7a] transition-colors">
+                  <button onClick={handleAddIngredientToRecipe} className={`bg-[${COLOR_PRIMARY}] text-white p-2 rounded-lg shadow-md hover:bg-[#4a1c7a] transition-colors`}>
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
@@ -436,7 +484,7 @@ function App() {
                   {newRecipe.ingredients.map((ing, i) => (
                     <div key={i} className="flex justify-between items-center text-sm bg-gray-50 px-3 py-2 rounded-lg">
                       <span className="font-medium capitalize text-black">{ing.name}</span>
-                      <span className="text-[#A9A9A9] text-xs font-mono">{ing.qty}</span>
+                      <span className={`text-[${COLOR_ACCENT}] text-xs font-mono`}>{ing.qty}</span>
                     </div>
                   ))}
                 </div>
@@ -445,56 +493,57 @@ function App() {
               {/* Instrucciones con Formato */}
               <div>
                 <div className="flex justify-between items-end mb-2">
-                  <label className="text-xs font-bold text-[#A9A9A9] uppercase tracking-wider">Instrucciones</label>
+                  <label className={`text-xs font-bold uppercase tracking-wider`} style={{color: COLOR_ACCENT}}>Instrucciones</label>
                   <div className="flex gap-1">
-                    <button onClick={() => insertFormat('bold')} className="p-1 bg-gray-100 rounded hover:bg-gray-200 text-[#5F249F]" title="Negrita">
+                    <button onClick={() => insertFormat('bold')} className={`p-1 bg-gray-100 rounded hover:bg-gray-200`} style={{color: COLOR_PRIMARY}} title="Negrita">
                       <Bold className="w-3 h-3" />
                     </button>
-                    <button onClick={() => insertFormat('list')} className="p-1 bg-gray-100 rounded hover:bg-gray-200 text-[#5F249F]" title="Lista">
+                    <button onClick={() => insertFormat('list')} className={`p-1 bg-gray-100 rounded hover:bg-gray-200`} style={{color: COLOR_PRIMARY}} title="Lista">
                       <List className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
                 <textarea 
                   id="instructions-area"
-                  className="w-full bg-gray-50 rounded-xl p-3 outline-none border-2 border-transparent focus:border-[#5F249F] h-32 text-sm resize-none leading-relaxed"
+                  className={`w-full bg-gray-50 rounded-xl p-3 outline-none border-2 border-transparent focus:border-[${COLOR_PRIMARY}] h-32 text-sm resize-none leading-relaxed`}
                   placeholder="Escribe aquí... Usa los botones para formato."
                   value={newRecipe.instructions}
                   onChange={e => setNewRecipe({...newRecipe, instructions: e.target.value})}
                 />
               </div>
 
+              {/* Botón de Guardar (Ahora se mantiene en la vista gracias al scroll del contenedor padre) */}
               <button 
                 onClick={saveNewRecipe}
                 disabled={!newRecipe.name || newRecipe.ingredients.length === 0}
-                className="w-full py-4 bg-[#5F249F] text-white rounded-xl font-bold hover:bg-[#4a1c7a] disabled:bg-[#A9A9A9] disabled:cursor-not-allowed transition-all shadow-lg"
+                className={`w-full py-4 bg-[${COLOR_PRIMARY}] text-white rounded-xl font-bold hover:bg-[#4a1c7a] disabled:bg-[${COLOR_ACCENT}] disabled:cursor-not-allowed transition-all shadow-lg`}
               >
                 Guardar Receta
               </button>
             </div>
           </div>
         )}
-      </main>
+      </div> {/* Fin del contenedor de scroll */}
 
-      {/* Bottom Bar con Púrpura */}
+      {/* Bottom Bar de Navegación (Fijo) */}
       <nav className="bg-white/95 backdrop-blur-md border-t border-gray-100 p-2 pb-6 absolute bottom-0 w-full flex justify-around items-center z-40">
         <button 
           onClick={() => setActiveTab('pantry')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'pantry' ? 'text-[#5F249F] bg-[#5F249F]/10' : 'text-[#A9A9A9] hover:text-[#5F249F]'}`}
+          className={`p-3 rounded-2xl transition-all ${activeTab === 'pantry' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
         >
           <ShoppingBag className="w-6 h-6" />
         </button>
 
         <button 
           onClick={() => setActiveTab('recipes')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'recipes' ? 'text-[#5F249F] bg-[#5F249F]/10' : 'text-[#A9A9A9] hover:text-[#5F249F]'}`}
+          className={`p-3 rounded-2xl transition-all ${activeTab === 'recipes' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
         >
           <BookOpen className="w-6 h-6" />
         </button>
 
         <button 
           onClick={() => setActiveTab('add')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'add' ? 'text-[#5F249F] bg-[#5F249F]/10' : 'text-[#A9A9A9] hover:text-[#5F249F]'}`}
+          className={`p-3 rounded-2xl transition-all ${activeTab === 'add' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -503,7 +552,3 @@ function App() {
     </div>
   );
 }
-
-// --- Renderizado FINAL (IMPORTANTE: Esto conecta React con el HTML) ---
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
