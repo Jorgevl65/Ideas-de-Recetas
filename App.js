@@ -423,7 +423,7 @@ export default function App() {
               {pantry.map((item, idx) => (
                 <span key={idx} className="bg-white border border-gray-200 text-black px-4 py-2 rounded-full flex items-center gap-2 shadow-sm animate-in zoom-in duration-200 text-sm font-medium">
                   <span className="capitalize">{item}</span>
-                  <button onClick={() => removePantryItem(item)} className="transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT}>
+                  <button onClick={() => removePantryItem(item)} className="transition-colors text-gray-400 hover:text-purple-600" >
                     <X className="w-4 h-4" />
                   </button>
                 </span>
