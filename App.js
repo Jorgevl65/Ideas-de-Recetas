@@ -4,6 +4,8 @@ import { ChefHat, Plus, X, Search, BookOpen, ShoppingBag, CheckCircle, AlertCirc
 // --- Constantes de Diseño ---
 const COLOR_PRIMARY = '#5F249F'; // Púrpura principal
 const COLOR_ACCENT = '#A9A9A9'; // Gris para detalles
+const COLOR_WHITE = '#FFFFFF';
+const COLOR_BLACK = '#000000';
 
 // --- Datos Iniciales Mejorados ---
 const INITIAL_RECIPES = [
@@ -51,7 +53,6 @@ const INITIAL_RECIPES = [
 // --- Componente para renderizar texto con formato básico ---
 const RichTextRenderer = ({ text }) => {
   return (
-    // Aplicamos estilos en línea para el color del texto base
     <div className="space-y-2 text-sm leading-relaxed font-medium">
       {text.split('\n').map((line, i) => {
         if (!line.trim()) return <br key={i} />;
@@ -60,10 +61,9 @@ const RichTextRenderer = ({ text }) => {
         if (line.trim().startsWith('-')) {
           return (
             <div key={i} className="flex gap-2 ml-2">
-              <span className={`font-bold`} style={{color: COLOR_PRIMARY}}>•</span>
+              <span className="font-bold" style={{color: COLOR_PRIMARY}}>•</span>
               <span className="text-gray-600" dangerouslySetInnerHTML={{ 
-                // Aseguramos que la negrita sea negra para contraste
-                __html: line.substring(1).replace(/\*\*(.*?)\*\*/g, '<strong style="color: black;">$1</strong>') 
+                __html: line.substring(1).replace(/\*\*(.*?)\*\*/g, `<strong style="color: ${COLOR_BLACK};">$1</strong>`) 
               }} />
             </div>
           );
@@ -72,8 +72,7 @@ const RichTextRenderer = ({ text }) => {
         // Renderizar texto normal con negritas
         return (
           <p key={i} className="text-gray-600" dangerouslySetInnerHTML={{ 
-            // Aseguramos que la negrita sea negra para contraste
-            __html: line.replace(/\*\*(.*?)\*\*/g, '<strong style="color: black;">$1</strong>') 
+            __html: line.replace(/\*\*(.*?)\*\*/g, `<strong style="color: ${COLOR_BLACK};">$1</strong>`) 
           }} />
         );
       })}
@@ -226,7 +225,7 @@ export default function App() {
             alt={selectedRecipe.name} 
             className="w-full h-full object-cover"
           />
-          <div className={`absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[${COLOR_PRIMARY}]/60 to-transparent`}></div>
+          <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-transparent" style={{ backgroundColor: `${COLOR_PRIMARY}99` }}></div>
           <button 
             onClick={() => setSelectedRecipe(null)}
             className="absolute top-4 left-4 p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/30 transition-all shadow-lg"
@@ -240,11 +239,11 @@ export default function App() {
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-3xl font-bold text-black leading-tight">{selectedRecipe.name}</h2>
             {status.canCook ? (
-              <span className={`bg-[${COLOR_PRIMARY}] text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-md`}>
+              <span className="text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1 shadow-md" style={{backgroundColor: COLOR_PRIMARY}}>
                 <CheckCircle className="w-3 h-3" /> LISTO
               </span>
             ) : (
-              <span className={`bg-[${COLOR_ACCENT}]/20 text-[${COLOR_ACCENT}] text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1`}>
+              <span className="text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1" style={{backgroundColor: `${COLOR_ACCENT}20`, color: COLOR_ACCENT}}>
                 Faltan {status.missing.length}
               </span>
             )}
@@ -258,11 +257,11 @@ export default function App() {
                 const hasIt = pantry.some(p => normalize(p) === normalize(ing.name));
                 return (
                   <li key={i} className="flex justify-between items-center text-sm">
-                    <span className={`capitalize flex items-center gap-2 ${hasIt ? 'text-black font-medium' : `text-[${COLOR_ACCENT}] line-through decoration-red-400`}`}>
+                    <span className={`capitalize flex items-center gap-2 ${hasIt ? 'text-black font-medium' : 'line-through decoration-red-400'}`} style={{color: hasIt ? COLOR_BLACK : COLOR_ACCENT}}>
                       {hasIt ? <CheckCircle className="w-4 h-4" style={{color: COLOR_PRIMARY}} /> : <AlertCircle className="w-4 h-4" style={{color: COLOR_ACCENT}} />}
                       {ing.name}
                     </span>
-                    <span className={`text-[${COLOR_ACCENT}] font-mono text-xs font-medium`}>{ing.qty}</span>
+                    <span className="font-mono text-xs font-medium" style={{color: COLOR_ACCENT}}>{ing.qty}</span>
                   </li>
                 );
               })}
@@ -286,7 +285,7 @@ export default function App() {
     <div className="min-h-screen bg-white text-black font-sans flex flex-col md:max-w-md md:mx-auto md:shadow-2xl md:min-h-screen overflow-hidden">
       
       {/* Header Personalizado (Fijo) */}
-      <header className={`bg-[${COLOR_PRIMARY}] text-white pt-8 pb-6 px-6 rounded-b-[2rem] shadow-xl relative z-10 transition-colors duration-300`}>
+      <header className="text-white pt-8 pb-6 px-6 rounded-b-[2rem] shadow-xl relative z-10 transition-colors duration-300" style={{backgroundColor: COLOR_PRIMARY}}>
         <div className="flex justify-between items-center mb-4">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
@@ -317,7 +316,7 @@ export default function App() {
                   checked={searchType === 'name'} 
                   onChange={() => setSearchType('name')}
                   className="form-radio text-white border-white/50 bg-transparent checked:bg-white checked:ring-white focus:ring-white"
-                  style={{color: 'white'}}
+                  style={{color: COLOR_WHITE}}
                 />
                 <span className="text-white">Por Nombre</span>
               </label>
@@ -329,7 +328,7 @@ export default function App() {
                   checked={searchType === 'ingredients'} 
                   onChange={() => setSearchType('ingredients')}
                   className="form-radio text-white border-white/50 bg-transparent checked:bg-white checked:ring-white focus:ring-white"
-                  style={{color: 'white'}}
+                  style={{color: COLOR_WHITE}}
                 />
                 <span className="text-white">Por Ingrediente</span>
               </label>
@@ -345,7 +344,7 @@ export default function App() {
         {activeTab === 'recipes' && (
           <div className="space-y-4 pb-4 animate-in fade-in slide-in-from-right-4 duration-300">
             {filteredRecipes.length === 0 ? (
-              <div className={`text-center py-10`} style={{color: COLOR_ACCENT}}>
+              <div className="text-center py-10" style={{color: COLOR_ACCENT}}>
                 <p>No encontramos recetas.</p>
               </div>
             ) : (
@@ -362,17 +361,17 @@ export default function App() {
                     {/* Badge de estado */}
                     <div className="absolute top-3 right-3">
                       {recipe.status.canCook ? (
-                        <span className={`bg-white/95 backdrop-blur text-[${COLOR_PRIMARY}] text-[10px] font-extrabold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1`}>
+                        <span className="bg-white/95 backdrop-blur text-[10px] font-extrabold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1" style={{color: COLOR_PRIMARY}}>
                           <CheckCircle className="w-3 h-3" /> LISTO
                         </span>
                       ) : (
-                        <span className={`bg-[${COLOR_PRIMARY}]/80 backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md`}>
+                        <span className="backdrop-blur text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 shadow-md" style={{backgroundColor: `${COLOR_PRIMARY}CC`}}>
                           FALTA {recipe.status.missing.length}
                         </span>
                       )}
                     </div>
                     
-                    <div className={`absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-[${COLOR_PRIMARY}]/90 to-transparent`}>
+                    <div className="absolute bottom-0 left-0 w-full p-4 bg-gradient-to-t from-transparent to-transparent" style={{backgroundColor: `${COLOR_PRIMARY}E6`}}>
                        <h4 className="font-bold text-white text-lg tracking-wide">{recipe.name}</h4>
                     </div>
                   </div>
@@ -392,9 +391,10 @@ export default function App() {
                   value={ingredientInput}
                   onChange={(e) => setIngredientInput(e.target.value)}
                   placeholder="Agregar ingrediente..."
-                  className={`flex-1 bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-3 outline-none focus:border-[${COLOR_PRIMARY}] transition-all text-sm font-medium text-black placeholder-[${COLOR_ACCENT}]`}
+                  className="flex-1 bg-gray-50 border-2 border-gray-100 rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium text-black"
+                  style={{borderColor: COLOR_ACCENT, focusBorderColor: COLOR_PRIMARY, placeholderColor: COLOR_ACCENT}}
                 />
-                <button type="submit" className={`bg-[${COLOR_PRIMARY}] text-white px-4 rounded-xl hover:bg-[#4a1c7a] active:scale-95 transition-all shadow-md`}>
+                <button type="submit" className="text-white px-4 rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md" style={{backgroundColor: COLOR_PRIMARY}}>
                   <Plus className="w-5 h-5" />
                 </button>
               </form>
@@ -402,12 +402,12 @@ export default function App() {
 
             <div className="flex flex-wrap gap-2">
               {pantry.length === 0 && (
-                <p className={`w-full text-center py-8 text-sm`} style={{color: COLOR_ACCENT}}>Tu nevera está vacía.</p>
+                <p className="w-full text-center py-8 text-sm" style={{color: COLOR_ACCENT}}>Tu nevera está vacía.</p>
               )}
               {pantry.map((item, idx) => (
                 <span key={idx} className="bg-white border border-gray-200 text-black px-4 py-2 rounded-full flex items-center gap-2 shadow-sm animate-in zoom-in duration-200 text-sm font-medium">
                   <span className="capitalize">{item}</span>
-                  <button onClick={() => removePantryItem(item)} className={`text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}] transition-colors`}>
+                  <button onClick={() => removePantryItem(item)} className="transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT}>
                     <X className="w-4 h-4" />
                   </button>
                 </span>
@@ -418,7 +418,6 @@ export default function App() {
 
         {/* --- VISTA: AGREGAR RECETA --- */}
         {activeTab === 'add' && (
-          // El padding final (pb-24) es crucial para que el último input no quede bajo la barra de navegación
           <div className="animate-in fade-in slide-in-from-right-4 duration-300 pb-24"> 
             <h3 className="font-bold text-xl mb-6" style={{color: COLOR_PRIMARY}}>Crear Receta</h3>
             
@@ -426,14 +425,15 @@ export default function App() {
               {/* Cargar Foto */}
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className={`h-40 w-full bg-gray-50 border-2 border-dashed border-[${COLOR_ACCENT}]/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors overflow-hidden group`}
+                className="h-40 w-full bg-gray-50 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors overflow-hidden group"
+                style={{borderColor: `${COLOR_ACCENT}80`}}
               >
                 {newRecipe.image ? (
                   <img src={newRecipe.image} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <>
-                    <Camera className={`w-8 h-8 mb-2 group-hover:text-[${COLOR_PRIMARY}] transition-colors`} style={{color: COLOR_ACCENT}} />
-                    <span className={`text-xs font-medium group-hover:text-[${COLOR_PRIMARY}]`} style={{color: COLOR_ACCENT}}>Toca para añadir foto</span>
+                    <Camera className="w-8 h-8 mb-2 transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT} />
+                    <span className="text-xs font-medium transition-colors" style={{color: COLOR_ACCENT}} onMouseOver={e => e.currentTarget.style.color = COLOR_PRIMARY} onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT}>Toca para añadir foto</span>
                   </>
                 )}
                 <input 
@@ -447,10 +447,11 @@ export default function App() {
 
               {/* Nombre */}
               <div>
-                <label className={`text-xs font-bold uppercase tracking-wider`} style={{color: COLOR_ACCENT}}>Nombre</label>
+                <label className="text-xs font-bold uppercase tracking-wider" style={{color: COLOR_ACCENT}}>Nombre</label>
                 <input 
                   type="text" 
-                  className={`w-full mt-1 bg-white border-b-2 border-gray-100 p-2 outline-none focus:border-[${COLOR_PRIMARY}] transition-all font-medium text-lg placeholder-gray-300`}
+                  className="w-full mt-1 bg-white border-b-2 border-gray-100 p-2 outline-none transition-all font-medium text-lg placeholder-gray-300 focus:border-opacity-100"
+                  style={{focusBorderColor: COLOR_PRIMARY}}
                   placeholder="Ej: Pasta Alfredo"
                   value={newRecipe.name}
                   onChange={e => setNewRecipe({...newRecipe, name: e.target.value})}
@@ -459,23 +460,25 @@ export default function App() {
 
               {/* Ingredientes + Cantidades */}
               <div>
-                <label className={`text-xs font-bold uppercase tracking-wider mb-2 block`} style={{color: COLOR_ACCENT}}>Ingredientes</label>
+                <label className="text-xs font-bold uppercase tracking-wider mb-2 block" style={{color: COLOR_ACCENT}}>Ingredientes</label>
                 <div className="flex gap-2 mb-3">
                   <input 
                     type="text" 
-                    className={`flex-[2] bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[${COLOR_PRIMARY}]`}
+                    className="flex-[2] bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-opacity-100"
+                    style={{focusBorderColor: COLOR_PRIMARY}}
                     placeholder="Ingrediente (ej: Huevo)"
                     value={newRecipe.currentIngName}
                     onChange={e => setNewRecipe({...newRecipe, currentIngName: e.target.value})}
                   />
                   <input 
                     type="text" 
-                    className={`flex-1 bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-[${COLOR_PRIMARY}]`}
+                    className="flex-1 bg-gray-50 rounded-lg p-2 text-sm outline-none border border-transparent focus:border-opacity-100"
+                    style={{focusBorderColor: COLOR_PRIMARY}}
                     placeholder="Cant. (ej: 2)"
                     value={newRecipe.currentIngQty}
                     onChange={e => setNewRecipe({...newRecipe, currentIngQty: e.target.value})}
                   />
-                  <button onClick={handleAddIngredientToRecipe} className={`bg-[${COLOR_PRIMARY}] text-white p-2 rounded-lg shadow-md hover:bg-[#4a1c7a] transition-colors`}>
+                  <button onClick={handleAddIngredientToRecipe} className="text-white p-2 rounded-lg shadow-md hover:opacity-90 transition-colors" style={{backgroundColor: COLOR_PRIMARY}}>
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
@@ -484,7 +487,7 @@ export default function App() {
                   {newRecipe.ingredients.map((ing, i) => (
                     <div key={i} className="flex justify-between items-center text-sm bg-gray-50 px-3 py-2 rounded-lg">
                       <span className="font-medium capitalize text-black">{ing.name}</span>
-                      <span className={`text-[${COLOR_ACCENT}] text-xs font-mono`}>{ing.qty}</span>
+                      <span className="text-xs font-mono" style={{color: COLOR_ACCENT}}>{ing.qty}</span>
                     </div>
                   ))}
                 </div>
@@ -493,30 +496,32 @@ export default function App() {
               {/* Instrucciones con Formato */}
               <div>
                 <div className="flex justify-between items-end mb-2">
-                  <label className={`text-xs font-bold uppercase tracking-wider`} style={{color: COLOR_ACCENT}}>Instrucciones</label>
+                  <label className="text-xs font-bold uppercase tracking-wider" style={{color: COLOR_ACCENT}}>Instrucciones</label>
                   <div className="flex gap-1">
-                    <button onClick={() => insertFormat('bold')} className={`p-1 bg-gray-100 rounded hover:bg-gray-200`} style={{color: COLOR_PRIMARY}} title="Negrita">
+                    <button onClick={() => insertFormat('bold')} className="p-1 bg-gray-100 rounded hover:bg-gray-200" style={{color: COLOR_PRIMARY}} title="Negrita">
                       <Bold className="w-3 h-3" />
                     </button>
-                    <button onClick={() => insertFormat('list')} className={`p-1 bg-gray-100 rounded hover:bg-gray-200`} style={{color: COLOR_PRIMARY}} title="Lista">
+                    <button onClick={() => insertFormat('list')} className="p-1 bg-gray-100 rounded hover:bg-gray-200" style={{color: COLOR_PRIMARY}} title="Lista">
                       <List className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
                 <textarea 
                   id="instructions-area"
-                  className={`w-full bg-gray-50 rounded-xl p-3 outline-none border-2 border-transparent focus:border-[${COLOR_PRIMARY}] h-32 text-sm resize-none leading-relaxed`}
+                  className="w-full bg-gray-50 rounded-xl p-3 outline-none border-2 border-transparent h-32 text-sm resize-none leading-relaxed focus:border-opacity-100"
+                  style={{focusBorderColor: COLOR_PRIMARY}}
                   placeholder="Escribe aquí... Usa los botones para formato."
                   value={newRecipe.instructions}
                   onChange={e => setNewRecipe({...newRecipe, instructions: e.target.value})}
                 />
               </div>
 
-              {/* Botón de Guardar (Ahora se mantiene en la vista gracias al scroll del contenedor padre) */}
+              {/* Botón de Guardar */}
               <button 
                 onClick={saveNewRecipe}
                 disabled={!newRecipe.name || newRecipe.ingredients.length === 0}
-                className={`w-full py-4 bg-[${COLOR_PRIMARY}] text-white rounded-xl font-bold hover:bg-[#4a1c7a] disabled:bg-[${COLOR_ACCENT}] disabled:cursor-not-allowed transition-all shadow-lg`}
+                className="w-full py-4 text-white rounded-xl font-bold hover:opacity-90 disabled:cursor-not-allowed transition-all shadow-lg"
+                style={{backgroundColor: newRecipe.name && newRecipe.ingredients.length > 0 ? COLOR_PRIMARY : COLOR_ACCENT}}
               >
                 Guardar Receta
               </button>
@@ -527,26 +532,23 @@ export default function App() {
 
       {/* Bottom Bar de Navegación (Fijo) */}
       <nav className="bg-white/95 backdrop-blur-md border-t border-gray-100 p-2 pb-6 absolute bottom-0 w-full flex justify-around items-center z-40">
-        <button 
-          onClick={() => setActiveTab('pantry')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'pantry' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
-        >
-          <ShoppingBag className="w-6 h-6" />
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('recipes')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'recipes' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
-        >
-          <BookOpen className="w-6 h-6" />
-        </button>
-
-        <button 
-          onClick={() => setActiveTab('add')}
-          className={`p-3 rounded-2xl transition-all ${activeTab === 'add' ? `text-[${COLOR_PRIMARY}] bg-[${COLOR_PRIMARY}]/10` : `text-[${COLOR_ACCENT}] hover:text-[${COLOR_PRIMARY}]`}`}
-        >
-          <Plus className="w-6 h-6" />
-        </button>
+        {[
+          { tab: 'pantry', icon: ShoppingBag },
+          { tab: 'recipes', icon: BookOpen },
+          { tab: 'add', icon: Plus }
+        ].map(({ tab, icon: Icon }) => (
+          <button 
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`p-3 rounded-2xl transition-all`}
+            style={{
+              color: activeTab === tab ? COLOR_PRIMARY : COLOR_ACCENT,
+              backgroundColor: activeTab === tab ? `${COLOR_PRIMARY}1A` : 'transparent'
+            }}
+          >
+            <Icon className="w-6 h-6" />
+          </button>
+        ))}
       </nav>
 
     </div>
