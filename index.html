@@ -29,7 +29,23 @@
     
     <div id="root"></div>
 
-    <script type="text/babel" data-type="module" src="./App.js"></script>
+    <script type="text/babel" src="./App.js"></script>
+
+    <script type="text/babel">
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import App from './App.js'; // Importa el componente App
+
+        // Obtiene el contenedor raíz
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        
+        // Renderiza el componente App
+        root.render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
+        );
+    </script>
 
 </body>
 </html>
