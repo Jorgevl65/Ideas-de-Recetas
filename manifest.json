@@ -4,7 +4,7 @@
   "description": "Mi aplicación de recetas personalizada.",
   "icons": [
     {
-      "src": "/icono_app.png",
+      "src": "./icono_app.png",
       "sizes": "968x968",
       "type": "image/png"
     }
